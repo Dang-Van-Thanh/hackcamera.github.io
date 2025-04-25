@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hack Camera</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: black;
+      color: #00ff00;
+      font-family: 'Courier New', Courier, monospace;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    #terminal {
+      height: 100vh;
+      width: 100vw;
+      padding: 20px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      background-color: black;
+    }
+
+    #videoContainer {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 9999;
+      display: none;
+      border: 3px solid #00ff00;
+      box-shadow: 0 0 30px #00ff00;
+      background-color: black;
+    }
+
+    #hackVideo {
+      width: 80vw;
+      height: 45vw;
+      max-width: 800px;
+      max-height: 450px;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div id="terminal">[Đang khởi động hệ thống... Nhấn phím bất kỳ để bắt đầu]</div>
+
+  <div id="videoContainer">
+    <iframe id="hackVideo" src="https://drive.google.com/file/d/1V6LlHji22bSp_D3fHWWtx4PYmk-Rnaq9/preview" width="640" height="480" allow="autoplay"></iframe>
+  </div>
+
+  <script>
+    const terminal = document.getElementById('terminal');
+    const videoContainer = document.getElementById('videoContainer');
+    const hackVideo = document.getElementById('hackVideo');
+
+    const ip = () => `${rand(100,255)}.${rand(0,255)}.${rand(0,255)}.${rand(0,255)}`;
+    const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+    const cameraCommands = [
+      () => `[+] Phát hiện thiết bị camera tại IP: ${ip()}`,
+      () => `>>> Đang quét cổng RTSP tại ${ip()}...`,
+      () => `[!] Truy cập camera không bảo mật: ${ip()}/liveview`,
+      () => `>>> Gửi payload truy cập camera... Thành công.`,
+      () => `>>> Đang lấy luồng video từ ${ip()}...`,
+      () => `[+] Ghi lại video từ camera ${ip()} - Đã lưu.`,
+      () => `>>> Đăng nhập thành công với tài khoản: admin:admin`,
+      () => `[!] Kết nối livestream camera công cộng tại ${ip()}`
+    ];
+
+    function requestFullScreen() {
+      const docEl = document.documentElement;
+      const request = docEl.requestFullscreen || docEl.webkitRequestFullscreen || docEl.mozRequestFullScreen || docEl.msRequestFullscreen;
+      if (request) request.call(docEl);
+    }
+
+    // Hàm kiểm tra khi video kết thúc (16 giây)
+    function checkVideoEnd() {
+      setTimeout(() => {
+        terminal.innerHTML += '\n[Video kết thúc. Đã lưu video thành công.]';
+        setTimeout(() => {
+          window.location.href = 'about:blank';
+        }, 2000); // Chuyển hướng sau 2 giây
+      }, 19000); // Video dài 16 giây (16000 mili giây)
+    }
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'F11') return; // Không xử lý phím F11
+
+      requestFullScreen();
+
+      if (e.key === 'Enter') {
+        terminal.innerHTML += '\n[ĐÃ KẾT NỐI CAMERA - PHÁT VIDEO...]';
+        videoContainer.style.display = 'block';
+        hackVideo.src = hackVideo.src; // Tải lại iframe để kích hoạt phát
+        checkVideoEnd(); // Kiểm tra khi video kết thúc
+      } else if (e.key === 'Escape') {
+        terminal.innerHTML += '\n[Ngắt kết nối & thoát hệ thống...]';
+        videoContainer.style.display = 'none';
+        setTimeout(() => {
+          window.location.href = 'about:blank';
+        }, 1000); // Chuyển hướng sau 1 giây
+      } else {
+        const cmd = cameraCommands[Math.floor(Math.random() * cameraCommands.length)];
+        terminal.innerHTML += '\n' + cmd();
+        terminal.scrollTop = terminal.scrollHeight;
+      }
+    });
+  </script>
+</body>
+</html>
